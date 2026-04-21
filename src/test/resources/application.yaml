@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ''
+  mail:
+    host: localhost
+    port: 25
+    username: ''
+    password: ''
+
+jwt:
+  secret: dGVzdHNlY3JldHRlc3RzZWNyZXR0ZXN0c2VjcmV0dGVzdHNlY3JldHRlc3RzZWNyZXQ=
+  expiration-ms: 900000
+
+async:
+  core-pool-size: 5
+  max-pool-size: 20
+  queue-capacity: 100
+  thread-name-prefix: onboardguard-async-
+
+app:
+  password-reset:
+    expiry-minutes: 30
+    rate-limit:
+      max-login-attempts: 10
+      window-seconds: 60
+  storage:
+    cloudinary:
+      cloud-name: test
+      api-key: test
+      api-secret: test
