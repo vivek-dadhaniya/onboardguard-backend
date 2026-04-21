@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Cleared</title>
+    <style>
+        body { margin:0; padding:0; background:#F1F5F9; font-family:Arial,sans-serif; }
+        .wrapper { max-width:600px; margin:32px auto; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; }
+        .header { background:#166534; padding:32px 40px; }
+        .header h1 { margin:0; color:#FFFFFF; font-size:22px; font-weight:600; }
+        .header p  { margin:6px 0 0; color:#DCFCE7; font-size:14px; }
+        .body   { padding:32px 40px; }
+        .body p { color:#334155; font-size:15px; line-height:1.7; margin:0 0 16px; }
+        .card   { background:#F8FAFC; border:1px solid #E2E8F0; border-radius:6px; padding:20px 24px; margin:20px 0; }
+        .card .label { font-size:12px; color:#64748B; text-transform:uppercase; letter-spacing:.05em; }
+        .card .value { font-size:18px; color:#1B3A5C; margin-top:4px; font-weight:600;}
+        .badge-cleared { display:inline-block; padding:4px 12px; background:#F0FDF4; color:#166534; border-radius:20px; font-size:13px; font-weight:600; }
+        .footer { background:#F8FAFC; padding:20px 40px; border-top:1px solid #E2E8F0; }
+        .footer p { margin:0; color:#94A3B8; font-size:12px; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <h1>Background Verification Cleared</h1>
+        <p>OnboardGuard Compliance System</p>
+    </div>
+    <div class="body">
+        <p>Dear <strong th:text="${candidateName}">Candidate</strong>,</p>
+        <p>Good news! Your background verification has been successfully completed and approved by our compliance team.</p>
+
+        <div class="card">
+            <div class="label">Final Status</div>
+            <div style="margin-top:6px;">
+                <span class="badge-cleared">APPROVED & CLEARED</span>
+            </div>
+            <hr style="border:0; border-top:1px solid #E2E8F0; margin:16px 0;" th:if="${reason != null and !reason.isEmpty()}">
+            <div class="label" th:if="${reason != null and !reason.isEmpty()}">Officer Notes</div>
+            <div class="value" th:if="${reason != null and !reason.isEmpty()}" th:text="${reason}">Standard verification complete.</div>
+        </div>
+        <p>The HR and Onboarding teams have been notified of this result and will reach out to you with the next steps shortly.</p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p style="margin-top:6px;">&copy; 2026 OnboardGuard. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,170 @@
+# ===========================
+# COMPILED & BUILD OUTPUT
+# ===========================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# JVM Crash Logs
+hs_err_pid*
+replay_pid*
+
+# ===========================
+# MAVEN
+# ===========================
+.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# ===========================
+# SPRING BOOT
+# ===========================
+*.original
+spring-shell.log
+
+# ===========================
+# ENVIRONMENT & SECRETS
+# ===========================
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+*.env
+application-local.properties
+application-local.yml
+application-dev.properties
+application-dev.yml
+application-prod.properties
+application-prod.yml
+secrets.yml
+secrets.properties
+
+# ===========================
+# LOGS
+# ===========================
+*.log
+*.log.*
+logs/
+log/
+
+# ===========================
+# IDE - IntelliJ IDEA
+# ===========================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# ===========================
+# IDE - Eclipse / STS
+# ===========================
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.metadata/
+*.launch
+*.prefs
+
+# ===========================
+# IDE - NetBeans
+# ===========================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ===========================
+# IDE - VS Code
+# ===========================
+.vscode/
+.cursor/
+*.code-workspace
+
+# ===========================
+# OS - macOS
+# ===========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+Icon?
+
+# ===========================
+# OS - Windows
+# ===========================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ===========================
+# OS - Linux
+# ===========================
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===========================
+# DATABASE
+# ===========================
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+*.mv.db
+*.trace.db
+
+# ===========================
+# DOCKER (if used later)
+# ===========================
+.dockerignore
+docker-compose.override.yml
+
+# ===========================
+# TESTING & COVERAGE
+# ===========================
+/test-results/
+/coverage/
+*.exec
+jacoco.exec
+surefire-reports/
+
+# ===========================
+# MISC
+# ===========================
+HELP.md
+*.tmp
+*.bak
+*.swp
+*.orig
+.cache/

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Update</title>
+    <style>
+        body { margin:0; padding:0; background:#F1F5F9; font-family:Arial,sans-serif; }
+        .wrapper { max-width:600px; margin:32px auto; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; }
+        .header { background:#1B3A5C; padding:32px 40px; }
+        .header h1 { margin:0; color:#FFFFFF; font-size:22px; font-weight:600; }
+        .header p  { margin:6px 0 0; color:#CBD5E1; font-size:14px; }
+        .body   { padding:32px 40px; }
+        .body p { color:#334155; font-size:15px; line-height:1.7; margin:0 0 16px; }
+        .card   { background:#FFF1F2; border:1px solid #FECDD3; border-radius:6px; padding:20px 24px; margin:20px 0; }
+        .card .label { font-size:12px; color:#9F1239; text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
+        .card .value { font-size:16px; color:#881337; margin-top:4px; }
+        .badge-rejected { display:inline-block; padding:4px 12px; background:#FFE4E6; color:#9F1239; border-radius:20px; font-size:13px; font-weight:600; }
+        .footer { background:#F8FAFC; padding:20px 40px; border-top:1px solid #E2E8F0; }
+        .footer p { margin:0; color:#94A3B8; font-size:12px; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <h1>Application Status Update</h1>
+        <p>OnboardGuard Compliance System</p>
+    </div>
+    <div class="body">
+        <p>Dear <strong th:text="${candidateName}">Candidate</strong>,</p>
+        <p>We have completed the review of your background verification application.</p>
+        <p>Unfortunately, based on our compliance screening requirements, we are unable to proceed with your onboarding process at this time.</p>
+
+        <p>
+            Status:&nbsp;<span class="badge-rejected">APPLICATION REJECTED</span>
+        </p>
+
+        <div class="card" th:if="${reason != null and !reason.isEmpty()}">
+            <div class="label">Reason Provided</div>
+            <div class="value" th:text="${reason}">Did not meet internal compliance criteria.</div>
+        </div>
+
+        <p>If you believe this decision was made in error, please contact your HR representative.</p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p style="margin-top:6px;">&copy; 2026 OnboardGuard. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

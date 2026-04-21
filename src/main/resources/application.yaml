@@ -1,0 +1,80 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+
+spring:
+
+  application:
+    name: onboardguard-backend
+
+  # DATABASE CONNECTION (PostgreSQL)
+  datasource:
+    url: ${DB_URL:}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  # JPA / HIBERNATE CONFIGURATION
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:}
+    show-sql: true
+#    open-in-view: false # Optimized for performance
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # REDIS CONFIGURATION (Caching)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      # Lettuce pool settings (optional, for better performance)
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 2
+          max-wait: 2000ms
+
+  # EMAIL / SMTP CONFIGURATION (JavaMailSender)
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com} # Defaulting to Gmail, change if using AWS SES/SendGrid
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          max-wait: 2000ms             # wait up to 2s before throwing pool exhausted error
+
+jwt:
+  secret: ${JWT_SECRET:}                # minimum 64-char Base64 string in env
+  expiration-ms: ${JWT_EXPIRATION_MS:}  # 15 minutes exactly
+
+app:
+
+  password-reset:
+    expiry-minutes: 30
+    rate-limit:
+      max-login-attempts: 10
+      window-seconds: 60
+
+  storage:
+    cloudinary:
+      cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+      api-key: ${CLOUDINARY_API_KEY:}
+      api-secret: ${CLOUDINARY_API_SECRET:}
+
+# Async Configuration
+async:
+  core-pool-size: ${ASYNC_CORE_POOL_SIZE:5}
+  max-pool-size: ${ASYNC_MAX_POOL_SIZE:20}
+  queue-capacity: ${ASYNC_QUEUE_CAPACITY:100}
+  thread-name-prefix: ${ASYNC_THREAD_NAME_PREFIX:onboardguard-async-}
