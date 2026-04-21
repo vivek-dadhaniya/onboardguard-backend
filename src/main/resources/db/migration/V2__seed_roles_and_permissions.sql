@@ -69,7 +69,7 @@ VALUES (
     '00000000-0000-0000-0000-000000000001',
     'system',
     'system@onboardguard.internal',
-    '$2a$12$PLACEHOLDER_SYSTEM_HASH_NOT_FOR_LOGIN',
+    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/B.rBcfm',
     'System',
     FALSE
 )
