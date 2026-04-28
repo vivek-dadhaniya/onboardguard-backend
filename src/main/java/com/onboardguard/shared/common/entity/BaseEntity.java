@@ -2,19 +2,23 @@ package com.onboardguard.shared.common.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)  // Auditing -> @EnableJpaAuditing inside config
 @Getter
 @Setter
+@SuperBuilder
+@NoArgsConstructor
 public abstract class BaseEntity {
 
     @Id
@@ -24,7 +28,7 @@ public abstract class BaseEntity {
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @CreatedBy
     @Column(updatable = false)
@@ -32,7 +36,7 @@ public abstract class BaseEntity {
 
     @LastModifiedDate
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @LastModifiedBy
     private String updatedBy;

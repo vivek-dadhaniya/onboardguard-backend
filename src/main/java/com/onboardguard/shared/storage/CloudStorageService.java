@@ -69,7 +69,7 @@ public interface CloudStorageService {
      * @param expiry      how long the URL should remain valid
      * @return            a fully-qualified HTTPS pre-signed URL
      */
-    String generatePresignedUrl(String storageKey, Duration expiry);
+    String generatePresignedUrl(String storageKey, Duration expiry, String contentType);
 
     /**
      * Deletes an object permanently.
@@ -81,7 +81,7 @@ public interface CloudStorageService {
      *
      * @param storageKey  the key to delete
      */
-    void delete(String storageKey);
+    void delete(String storageKey, String contentType);
 
     /**
      * Checks whether an object with the given key exists.
@@ -90,5 +90,5 @@ public interface CloudStorageService {
      * @param storageKey the key to probe
      * @return {@code true} if an object exists at that key
      */
-    boolean exists(String storageKey);
+    boolean exists(String storageKey, String contentType);
 }

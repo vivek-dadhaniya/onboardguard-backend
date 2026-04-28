@@ -1,11 +1,10 @@
 package com.onboardguard.shared.common.enums;
 
 public enum CategoryCode {
-    FRAUD_REGISTRY,
-    CRIMINAL_RECORDS,
-    BLACKLISTED_VENDORS,
-    PEP_LIST,
-    EMPLOYMENT_FRAUD,
-    DEBARRED_PROFESSIONALS,
-
+    FRAUD,
+    CRIMINAL,
+    BLACKLIST,
+    PEP,
+    EMPLOYMENT_ISSUE,
+    PROFESSIONAL_MISCONDUCT
 }

@@ -4,5 +4,6 @@ public enum NoteType {
     COMMENT,
     STATUS_CHANGE,
     ESCALATION,
-    RESOLUTION
+    SYSTEM_ACTION,
+    INVESTIGATION, RESOLUTION
 }

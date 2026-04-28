@@ -1,6 +1,5 @@
 package com.onboardguard.shared.storage;
 
-import com.cloudinary.AuthToken;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.onboardguard.shared.common.exception.StorageValidationException;
@@ -12,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +24,6 @@ public class CloudinaryStorageServiceImpl implements CloudStorageService {
 
     private static final String NOT_FOUND_MESSAGE = "not found";
 
-    // PROJECT REQUIREMENTS: VALIDATION CONSTANTS
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
     private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
             "application/pdf",
@@ -34,13 +31,17 @@ public class CloudinaryStorageServiceImpl implements CloudStorageService {
             "image/png"
     );
 
-    // VALIDATION & SANITIZATION
     private String validateAndSanitizeKey(String storageKey) {
         if (storageKey == null || storageKey.isBlank()) {
             throw new StorageValidationException("storageKey must not be null or empty");
         }
-        // Allows alphanumeric, slashes (folders), hyphens, underscores, and dots (extensions)
         return storageKey.replaceAll("[^a-zA-Z0-9/\\-_\\.]", "_");
+    }
+
+    private void validateContentType(String contentType) {
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new StorageValidationException("Invalid file format. Only PDF, JPG, and PNG are accepted.");
+        }
     }
 
     private void validateMultipartFile(MultipartFile file) {
@@ -50,12 +51,9 @@ public class CloudinaryStorageServiceImpl implements CloudStorageService {
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new StorageValidationException("File exceeds the 5MB maximum size limit.");
         }
-        if (file.getContentType() == null || !ALLOWED_CONTENT_TYPES.contains(file.getContentType().toLowerCase())) {
-            throw new StorageValidationException("Invalid file format. Only PDF, JPG, and PNG are accepted.");
-        }
+        validateContentType(file.getContentType());
     }
 
-    // UPLOAD MultipartFile
     @Override
     public String upload(String storageKey, MultipartFile file) {
         String safeKey = validateAndSanitizeKey(storageKey);
@@ -64,14 +62,13 @@ public class CloudinaryStorageServiceImpl implements CloudStorageService {
         log.debug("Cloudinary upload: key={} size={}B", safeKey, file.getSize());
 
         try {
-            return uploadBytesToCloudinary(safeKey, file.getBytes());
+            return uploadBytesToCloudinary(safeKey, file.getBytes(), file.getContentType());
         } catch (IOException e) {
             log.error("Failed to read file bytes: key={}", safeKey, e);
             throw new CloudStorageException("Failed to read uploaded file", safeKey, e);
         }
     }
 
-    // UPLOAD byte[]
     @Override
     public String uploadBytes(String storageKey, byte[] content, String contentType) {
         String safeKey = validateAndSanitizeKey(storageKey);
@@ -79,21 +76,34 @@ public class CloudinaryStorageServiceImpl implements CloudStorageService {
         if (content == null || content.length == 0) {
             throw new StorageValidationException("content must not be empty");
         }
+        validateContentType(contentType);
 
-        log.debug("Cloudinary uploadBytes: key={} size={}B", safeKey, content.length);
-
-        return uploadBytesToCloudinary(safeKey, content);
+        return uploadBytesToCloudinary(safeKey, content, contentType);
     }
 
-    // CORE UPLOAD
-    private String uploadBytesToCloudinary(String storageKey, byte[] bytes) {
+    private String uploadBytesToCloudinary(String storageKey, byte[] bytes, String contentType) {
         try {
+            String folderPath = "";
+            String fileName = storageKey;
+
+            if (storageKey.contains("/")) {
+                folderPath = storageKey.substring(0, storageKey.lastIndexOf("/"));
+                fileName = storageKey.substring(storageKey.lastIndexOf("/") + 1);
+            }
+
+            String resourceType = resolveResourceType(contentType);
+
+            // IMPORTANT: Images get extensions stripped, RAW files (PDFs) KEEP their extensions.
+            if ("image".equals(resourceType) && fileName.contains(".")) {
+                fileName = fileName.substring(0, fileName.lastIndexOf("."));
+            }
+
             Map<String, Object> params = ObjectUtils.asMap(
-                    "public_id", storageKey,
-                    "resource_type", resolveResourceType(storageKey),
+                    "public_id", fileName,
+                    "folder", folderPath,
+                    "resource_type", resourceType,
                     "type", "authenticated",
                     "overwrite", true,
-                    // REQUIRED to keep "candidateId/docType/filename" format perfectly intact
                     "use_filename", true,
                     "unique_filename", false
             );
@@ -101,106 +111,93 @@ public class CloudinaryStorageServiceImpl implements CloudStorageService {
             Map<?, ?> result = cloudinary.uploader().upload(bytes, params);
 
             if (result == null || result.get("public_id") == null) {
-                log.error("Invalid Cloudinary upload response: key={} response={}", storageKey, result);
                 throw new CloudStorageException("Invalid upload response", storageKey);
             }
 
-            log.debug("Cloudinary upload complete: key={}", storageKey);
-            return storageKey;
+            return (String) result.get("public_id");
 
         } catch (Exception e) {
-            log.error("Cloudinary upload failed: key={}", storageKey, e);
+            log.error("Cloudinary upload failed", e);
             throw new CloudStorageException("Cloudinary upload failed", storageKey, e);
         }
     }
 
-    // PRESIGNED URL (Time-Limited / Not Public)
     @Override
-    public String generatePresignedUrl(String storageKey, Duration expiry) {
+    public String generatePresignedUrl(String storageKey, Duration expiry, String contentType) {
         String safeKey = validateAndSanitizeKey(storageKey);
-
-        if (expiry == null || expiry.isZero() || expiry.isNegative()) {
-            throw new StorageValidationException("expiry must be positive");
-        }
-
-        log.debug("Cloudinary presign: key={} expiryMin={}", safeKey, expiry.toMinutes());
+        validateContentType(contentType);
 
         try {
-            long expireAt = Instant.now().plus(expiry).getEpochSecond();
+            String resourceType = resolveResourceType(contentType);
 
-            AuthToken authToken = new AuthToken()
-                    .tokenName("e")          // e = expire
-                    .expiration(expireAt);   // URL invalid after this Unix timestamp
-
-            String url = cloudinary.url()
+            com.cloudinary.Url urlBuilder = cloudinary.url()
                     .secure(true)
-                    .resourceType(resolveResourceType(safeKey))
+                    .resourceType(resourceType)
                     .type("authenticated")
-                    .authToken(authToken)
-                    .generate(safeKey);
+                    .signed(true);
 
-            log.debug("Presigned URL generated: key={} expireAt={}", safeKey, expireAt);
-            return url;
+            // Re-apply format only for images. RAW (PDF) uses the extension already present in the safeKey.
+            if ("image".equals(resourceType)) {
+                String format = contentType.toLowerCase().contains("jpeg") || contentType.toLowerCase().contains("jpg") ? "jpg" : "png";
+                urlBuilder.format(format);
+            }
+
+            return urlBuilder.generate(safeKey);
 
         } catch (Exception e) {
-            log.error("Failed to generate presigned URL: key={}", safeKey, e);
+            log.error("Failed to generate signed URL", e);
             throw new CloudStorageException("Failed to generate signed URL", safeKey, e);
         }
     }
 
-    // DELETE
     @Override
-    public void delete(String storageKey) {
+    public void delete(String storageKey, String contentType) {
         String safeKey = validateAndSanitizeKey(storageKey);
-        log.debug("Cloudinary delete: key={}", safeKey);
+        validateContentType(contentType);
 
         try {
             Map<?, ?> result = cloudinary.uploader().destroy(safeKey, ObjectUtils.asMap(
-                    "resource_type", resolveResourceType(safeKey),
+                    "resource_type", resolveResourceType(contentType),
                     "type", "authenticated"
             ));
 
             if (result == null || !"ok".equals(result.get("result"))) {
-                log.error("Cloudinary delete failed: key={} response={}", safeKey, result);
                 throw new CloudStorageException("Delete failed", safeKey);
             }
 
-            log.debug("Cloudinary delete complete: key={}", safeKey);
-
         } catch (Exception e) {
-            log.error("Cloudinary delete exception: key={}", safeKey, e);
+            log.error("Cloudinary delete exception", e);
             throw new CloudStorageException("Cloudinary delete failed", safeKey, e);
         }
     }
 
-    // EXISTS
     @Override
-    public boolean exists(String storageKey) {
+    public boolean exists(String storageKey, String contentType) {
         String safeKey = validateAndSanitizeKey(storageKey);
-        log.debug("Cloudinary exists check: key={}", safeKey);
+        validateContentType(contentType);
 
         try {
             cloudinary.api().resource(safeKey, ObjectUtils.asMap(
-                    "resource_type", resolveResourceType(safeKey),
+                    "resource_type", resolveResourceType(contentType),
                     "type", "authenticated"
             ));
             return true;
 
         } catch (Exception e) {
             String msg = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
-
             if (msg.contains(NOT_FOUND_MESSAGE) || msg.contains("resource not found")) {
-                log.debug("Cloudinary resource not found: key={}", safeKey);
                 return false;
             }
-
-            log.error("Cloudinary exists check failed: key={} message={}", safeKey, msg, e);
             throw new CloudStorageException("Existence check failed", safeKey, e);
         }
     }
 
-    // RESOURCE TYPE
-    private String resolveResourceType(String storageKey) {
-        return "raw";
+    private String resolveResourceType(String contentType) {
+        if (contentType == null) return "raw";
+        return switch (contentType.toLowerCase()) {
+            case "image/jpeg", "image/png" -> "image";
+            case "application/pdf" -> "raw"; // REVERTED: PDFs must be raw to retain document properties
+            default -> "raw";
+        };
     }
 }

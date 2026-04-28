@@ -13,4 +13,5 @@ public enum ActionType {
     USER_ACTIVATE,
     USER_DEACTIVATE,
     USER_ROLE_UPDATE,
+    UPDATE,
 }

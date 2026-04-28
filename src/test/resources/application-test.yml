@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    # Added naming strategy to ensure consistency
+    url: jdbc:h2:mem:onboardguard_testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:test-data.sql
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate.format_sql: true
+      # This ensures H2 ignores PostgreSQL-specific keywords it doesn't understand
+      hibernate.jdbc.lob.non_contextual_creation: true
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+# Custom toggle for your services
+app:
+  elasticsearch:
+    enabled: false

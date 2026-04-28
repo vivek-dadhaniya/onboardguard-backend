@@ -1,8 +1,9 @@
 package com.onboardguard.shared.common.enums;
 
 public enum AliasType {
-    AKA,
-    MAIDEN_NAME,
-    ABBREVIATION,
-    TRANSLITERATION
+    AKA,  // Also Known As
+    FKA,  // Formerly Known As
+    NICKNAME,
+    SHORT_NAME,
+    LEGAL_NAME_VARIATION
 }

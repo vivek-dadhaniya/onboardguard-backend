@@ -12,10 +12,16 @@ spring:
     url: ${DB_URL:}
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
-    driver-class-name: org.postgresql.Driver
+#    driver-class-name: org.postgresql.Driver
+
+  # SQL INITIALIZATION (Added for data.sql seeding)
+  sql:
+    init:
+      mode: always
 
   # JPA / HIBERNATE CONFIGURATION
   jpa:
+    defer-datasource-initialization: true # CRITICAL: Ensures data.sql runs AFTER Hibernate creates tables
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:}
     show-sql: true
@@ -39,6 +45,11 @@ spring:
           min-idle: 2
           max-wait: 2000ms
 
+    # Disable Spring Data Elasticsearch repositories during test/local runs by default
+    elasticsearch:
+      repositories:
+        enabled: true
+
   # EMAIL / SMTP CONFIGURATION (JavaMailSender)
   mail:
     host: ${MAIL_HOST:smtp.gmail.com} # Defaulting to Gmail, change if using AWS SES/SendGrid
@@ -54,9 +65,16 @@ spring:
             required: true
           max-wait: 2000ms             # wait up to 2s before throwing pool exhausted error
 
+  # Elasticsearch configuration
+  elasticsearch:
+    # URL goes here (e.g., https://es-cluster.company.com:9200)
+    uris: ${ELASTICSEARCH_URIS:}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
+
 jwt:
-  secret: ${JWT_SECRET:}                # minimum 64-char Base64 string in env
-  expiration-ms: ${JWT_EXPIRATION_MS:}  # 15 minutes exactly
+  secret: ${JWT_SECRET:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=} # 32-byte base64 fallback for local/test
+  expiration-ms: ${JWT_EXPIRATION_MS:900000}  # 15 minutes in milliseconds
 
 app:
 
@@ -71,6 +89,13 @@ app:
       cloud-name: ${CLOUDINARY_CLOUD_NAME:}
       api-key: ${CLOUDINARY_API_KEY:}
       api-secret: ${CLOUDINARY_API_SECRET:}
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+
+  # Disable Elasticsearch auto-configuration in test / local by default.
+  elasticsearch:
+    enabled: true
 
 # Async Configuration
 async:
